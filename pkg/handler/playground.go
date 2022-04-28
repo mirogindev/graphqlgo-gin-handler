@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -10,24 +12,44 @@ type playgroundData struct {
 	PlaygroundVersion    string
 	Endpoint             string
 	SubscriptionEndpoint string
+	Headers              map[string]string
 	SetTitle             bool
 }
 
 // renderPlayground renders the Playground GUI
-func renderPlayground(w http.ResponseWriter, r *http.Request) {
+func renderPlayground(w http.ResponseWriter, r *http.Request, hFunc HeadersFunc) {
+	if hFunc == nil {
+		hFunc = func() map[string]string {
+			return make(map[string]string)
+		}
+	}
+
 	t := template.New("Playground")
-	t, err := t.Parse(graphcoolPlaygroundTemplate)
+	t, err := t.Funcs(template.FuncMap{
+		"marshal": func(v interface{}) template.JS {
+			a, _ := json.Marshal(v)
+			return template.JS(a)
+		},
+	}).Parse(graphcoolPlaygroundTemplate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("----------------------------------------------------")
+
+	log.Println(r.URL.RawQuery)
+	log.Println(r.URL.Path)
 
 	d := playgroundData{
 		PlaygroundVersion:    graphcoolPlaygroundVersion,
 		Endpoint:             r.URL.Path,
 		SubscriptionEndpoint: fmt.Sprintf("ws://%v/subscriptions", r.Host),
 		SetTitle:             true,
+		Headers:              hFunc(),
 	}
+
+	log.Println(d)
 	err = t.ExecuteTemplate(w, "index", d)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -96,7 +118,8 @@ add "&raw" to the end of the URL within a browser.
         // options as 'endpoint' belong here
         endpoint: {{ .Endpoint }},
         subscriptionEndpoint: {{ .SubscriptionEndpoint }},
-        setTitle: {{ .SetTitle }}
+        setTitle: {{ .SetTitle }},
+		headers: {{ marshal .Headers }}
       })
     })</script>
 </body>

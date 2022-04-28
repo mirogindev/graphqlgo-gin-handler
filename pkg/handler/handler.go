@@ -20,13 +20,16 @@ const (
 
 type ResultCallbackFn func(ctx context.Context, params *graphql.Params, result *graphql.Result, responseBody []byte)
 
+type HeadersFunc func() map[string]string
+
 type Handler struct {
-	Schema           *graphql.Schema
-	pretty           bool
-	playground       bool
-	rootObjectFn     RootObjectFn
-	resultCallbackFn ResultCallbackFn
-	formatErrorFn    func(err error) gqlerrors.FormattedError
+	Schema            *graphql.Schema
+	pretty            bool
+	playground        bool
+	playgroundHeaders HeadersFunc
+	rootObjectFn      RootObjectFn
+	resultCallbackFn  ResultCallbackFn
+	formatErrorFn     func(err error) gqlerrors.FormattedError
 }
 
 type RequestOptions struct {
@@ -159,7 +162,7 @@ func (h *Handler) Handler(c *gin.Context) {
 		acceptHeader := r.Header.Get("Accept")
 		_, raw := r.URL.Query()["raw"]
 		if !raw && !strings.Contains(acceptHeader, "application/json") && strings.Contains(acceptHeader, "text/html") {
-			renderPlayground(w, r)
+			renderPlayground(w, r, h.playgroundHeaders)
 			return
 		}
 	}

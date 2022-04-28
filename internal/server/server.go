@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
 	"github.com/mirogindev/graphqlgo-gin-handler/pkg/handler"
@@ -9,6 +10,9 @@ import (
 
 func StartServer() {
 	r := gin.Default()
+	r.Use(Midleware3())
+	r.Use(Midleware2())
+	r.Use(Midleware1())
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -42,4 +46,32 @@ func getTestSchema() *graphql.Schema {
 		log.Fatalf("failed to create new schema, error: %v", err)
 	}
 	return &schema
+}
+
+func Midleware1() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("1 before")
+		c.Next()
+		fmt.Println("1 after")
+	}
+}
+
+func Midleware2() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("2 before")
+
+		c.Next()
+
+		fmt.Println("2 after")
+	}
+}
+
+func Midleware3() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("3 before")
+
+		c.Next()
+
+		fmt.Println("3 after")
+	}
 }
