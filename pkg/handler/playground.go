@@ -19,7 +19,7 @@ type playgroundData struct {
 // renderPlayground renders the Playground GUI
 func renderPlayground(w http.ResponseWriter, r *http.Request, hFunc HeadersFunc) {
 	if hFunc == nil {
-		hFunc = func() map[string]string {
+		hFunc = func(r *http.Request) map[string]string {
 			return make(map[string]string)
 		}
 	}
@@ -46,7 +46,7 @@ func renderPlayground(w http.ResponseWriter, r *http.Request, hFunc HeadersFunc)
 		Endpoint:             r.URL.Path,
 		SubscriptionEndpoint: fmt.Sprintf("ws://%v/subscriptions", r.Host),
 		SetTitle:             true,
-		Headers:              hFunc(),
+		Headers:              hFunc(r),
 	}
 
 	log.Println(d)

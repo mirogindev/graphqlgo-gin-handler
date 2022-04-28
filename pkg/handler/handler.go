@@ -20,7 +20,7 @@ const (
 
 type ResultCallbackFn func(ctx context.Context, params *graphql.Params, result *graphql.Result, responseBody []byte)
 
-type HeadersFunc func() map[string]string
+type HeadersFunc func(r *http.Request) map[string]string
 
 type Handler struct {
 	Schema            *graphql.Schema
