@@ -192,13 +192,14 @@ func (h *Handler) Handler(c *gin.Context) {
 type RootObjectFn func(ctx context.Context, r *http.Request) map[string]interface{}
 
 type Config struct {
-	Schema           *graphql.Schema
-	Pretty           bool
-	GraphiQL         bool
-	Playground       bool
-	RootObjectFn     RootObjectFn
-	ResultCallbackFn ResultCallbackFn
-	FormatErrorFn    func(err error) gqlerrors.FormattedError
+	Schema                *graphql.Schema
+	Pretty                bool
+	GraphiQL              bool
+	Playground            bool
+	PlaygroundHeadersFunc HeadersFunc
+	RootObjectFn          RootObjectFn
+	ResultCallbackFn      ResultCallbackFn
+	FormatErrorFn         func(err error) gqlerrors.FormattedError
 }
 
 func NewConfig() *Config {
@@ -220,11 +221,12 @@ func New(p *Config) *Handler {
 	}
 
 	return &Handler{
-		Schema:           p.Schema,
-		pretty:           p.Pretty,
-		playground:       p.Playground,
-		rootObjectFn:     p.RootObjectFn,
-		resultCallbackFn: p.ResultCallbackFn,
-		formatErrorFn:    p.FormatErrorFn,
+		Schema:            p.Schema,
+		pretty:            p.Pretty,
+		playground:        p.Playground,
+		playgroundHeaders: p.PlaygroundHeadersFunc,
+		rootObjectFn:      p.RootObjectFn,
+		resultCallbackFn:  p.ResultCallbackFn,
+		formatErrorFn:     p.FormatErrorFn,
 	}
 }
