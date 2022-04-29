@@ -122,9 +122,15 @@ func NewRequestOptions(r *http.Request) *RequestOptions {
 	}
 }
 
-func (h *Handler) Bind(ginEngine *gin.Engine, relativePath string) {
+func (h *Handler) BindEngine(gin *gin.Engine, relativePath string) {
 	for _, m := range []string{"POST", "PUT", "GET", "DELETE"} {
-		ginEngine.Handle(m, "/graphql", h.Handler)
+		gin.Handle(m, "/graphql", h.Handler)
+	}
+}
+
+func (h *Handler) BindGroup(gin *gin.RouterGroup, relativePath string) {
+	for _, m := range []string{"POST", "PUT", "GET", "DELETE"} {
+		gin.Handle(m, "/graphql", h.Handler)
 	}
 }
 
